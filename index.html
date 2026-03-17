@@ -79,5 +79,31 @@
         document.getElementById('genPwd').value = d.password;
     }
 </script>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Форманы немесе батырманы табу
+    const cyberBtn = document.querySelector('.btn-cyber');
+    const passwordInput = document.querySelector('input[type="password"]');
+
+    if (cyberBtn) {
+        cyberBtn.addEventListener('click', function(e) {
+            e.preventDefault(); // Беттің қайта жүктелуін тоқтатады
+            
+            const password = passwordInput ? passwordInput.value : "";
+
+            // Бұл жерде логиканы тексереміз (мысалы, пароль 12345 болса)
+            if (password === "12345") {
+                alert("Қолжетімділік рұқсат етілді! CyberQalqan қорғанысы белсенді.");
+                // Осы жерде басқа бетке жіберуге де болады:
+                // window.location.href = "success.html"; 
+            } else if (password === "") {
+                alert("Өтініш, парольді енгізіңіз.");
+            } else {
+                alert("Қате пароль! Қайта тексеріңіз.");
+            }
+        });
+    }
+});
+</script>
 </body>
 </html>
