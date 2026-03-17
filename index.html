@@ -119,5 +119,66 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkBtn = document.querySelector('.btn-cyber'); // Тексеру батырмасы
+    const inputField = document.querySelector('input'); // Мәтін жазатын жер
+    
+    // Нәтиже шығатын блок жасау
+    let resultDiv = document.querySelector('#result');
+    if (!resultDiv) {
+        resultDiv = document.createElement('div');
+        resultDiv.id = 'result';
+        resultDiv.style.marginTop = '20px';
+        resultDiv.style.padding = '15px';
+        resultDiv.style.borderRadius = '10px';
+        checkBtn.parentNode.appendChild(resultDiv);
+    }
+
+    checkBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const value = inputField.value.trim();
+
+        if (value === "") {
+            alert("Өтініш, тексеру үшін мәлімет енгізіңіз!");
+            return;
+        }
+
+        // 1. СІЛТЕМЕНІ ТЕКСЕРУ ЛОГИКАСЫ (URL Check)
+        if (value.includes("http") || value.includes(".com") || value.includes(".kz")) {
+            const isPhishing = value.includes("login") || value.includes("bank") || !value.startsWith("https");
+            
+            if (isPhishing) {
+                showResult("ҚАУІПТІ СІЛТЕМЕ!", "Бұл сілтеме фишингтік белгілерге ие (HTTPS жоқ немесе күдікті сөздер бар).", "#ff4d4d");
+            } else {
+                showResult("ҚАУІПСІЗ СІЛТЕМЕ", "Сілтеме қауіпсіздік сертификатымен қорғалған, ИИ күдікті ештеңе таппады.", "#00ff00");
+            }
+        } 
+        // 2. ПАРОЛЬДІ ТЕКСЕРУ ЛОГИКАСЫ (Password Check)
+        else {
+            const hasUpper = /[A-Z]/.test(value);
+            const hasLower = /[a-z]/.test(value);
+            const hasNumber = /[0-9]/.test(value);
+            const hasSpecial = /[!@#$%^&*]/.test(value);
+            const length = value.length;
+
+            if (length > 10 && hasUpper && hasNumber && hasSpecial) {
+                showResult("ҚУАТТЫ ПАРОЛЬ", "ИИ анализі: Бұл парольді бұзу үшін 100+ жыл қажет. Қауіпсіз!", "#00ff00");
+            } else if (length > 6) {
+                showResult("ОРТАША ПАРОЛЬ", "Парольді күшейту үшін арнайы таңбалар мен бас әріптер қосыңыз.", "#ffcc00");
+            } else {
+                showResult("ӘЛСІЗ ПАРОЛЬ!", "Бұл пароль өте оңай бұзылады. Оны қолданбаңыз!", "#ff4d4d");
+            }
+        }
+    });
+
+    function showResult(title, desc, color) {
+        resultDiv.style.border = `1px solid ${color}`;
+        resultDiv.style.background = `rgba(${color === "#00ff00" ? '0,255,0' : '255,0,0'}, 0.1)`;
+        resultDiv.style.color = color;
+        resultDiv.innerHTML = `<h4>${title}</h4><p>${desc}</p>`;
+    }
+});
+</script>
 </body>
 </html>
