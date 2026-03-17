@@ -121,74 +121,69 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // 1. Элементтерді нақты тауып аламыз
+    // 1. Элементтерді анықтау
     const checkBtn = document.querySelector('.btn-cyber'); 
-    const passInput = document.querySelector('input[placeholder*="Құпия"]');
+    const genBtn = document.querySelector('.btn-gen');
+    const passInput = document.querySelector('input[type="password"]') || document.querySelector('input[placeholder*="Құпия"]');
     const urlInput = document.querySelector('input[placeholder*="Сілтеме"]');
-    
-    // Нәтиже шығатын орынды бір-ақ рет жасап қоямыз
-    let resultDiv = document.querySelector('#cyber-result');
+
+    // 2. Нәтиже шығатын блокты дайындау (Analyzer үшін)
+    let resultDiv = document.getElementById('cyber-result');
     if (!resultDiv) {
         resultDiv = document.createElement('div');
         resultDiv.id = 'cyber-result';
-        resultDiv.style.cssText = "margin-top:20px; padding:15px; border-radius:10px; display:none; font-weight:bold; text-align:center;";
-        checkBtn.parentNode.appendChild(resultDiv);
+        resultDiv.style.cssText = "margin-top:15px; padding:12px; border-radius:8px; text-align:center; display:none; font-size:0.9rem;";
+        if (checkBtn) checkBtn.parentNode.appendChild(resultDiv);
     }
 
-    checkBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        
-        // Қай инпут толтырылғанын анықтаймыз
-        const passValue = passInput ? passInput.value.trim() : "";
-        const urlValue = urlInput ? urlInput.value.trim() : "";
-        
-        resultDiv.style.display = "block"; // Нәтижені көрсетеміз
+    // 3. Талдау (Analyzer) батырмасы
+    if (checkBtn) {
+        checkBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const passVal = passInput ? passInput.value.trim() : "";
+            const urlVal = urlInput ? urlInput.value.trim() : "";
 
-        // СІЛТЕМЕНІ ТЕКСЕРУ (Бірінші осыны тексереміз)
-        if (urlValue !== "") {
-            const isPhishing = urlValue.includes("login") || urlValue.includes("bank") || !urlValue.startsWith("https");
-            if (isPhishing) {
-                showRes("🔴 ҚАУІПТІ СІЛТЕМЕ!", "Фишинг белгілері анықталды. HTTPS жоқ немесе күдікті адрес.", "#ff4d4d");
-            } else {
-                showRes("🟢 ҚАУІПСІЗ СІЛТЕМЕ", "ИИ анализі: Сілтеме сенімді, зиянды элементтер табылмады.", "#00ff00");
-            }
-        } 
-        // ПАРОЛЬДІ ТЕКСЕРУ
-        else if (passValue !== "") {
-            const score = (passValue.length > 8) + /[A-Z]/.test(passValue) + /[0-9]/.test(passValue) + /[!@#$%^&*]/.test(passValue);
-            if (score >= 4) {
-                showRes("🔒 ӨТЕ ҚУАТТЫ ПАРОЛЬ", "Бұл парольді бұзу мүмкін емес дерлік. Керемет!", "#00ff00");
-            } else if (score >= 2) {
-                showRes("⚠️ ОРТАША ПАРОЛЬ", "Қауіпсіздік үшін символдар мен бас әріптер қосыңыз.", "#ffcc00");
-            } else {
-                showRes("❌ ӘЛСІЗ ПАРОЛЬ!", "Бұл пароль өте оңай бұзылады. Аустыруды ұсынамыз.", "#ff4d4d");
-            }
-        } else {
-            alert("Өтініш, тексеру үшін бірдеңе жазыңыз!");
-            resultDiv.style.display = "none";
-        }
-    });
+            resultDiv.style.display = "block";
 
-    function showRes(title, desc, color) {
-        resultDiv.style.border = `2px solid ${color}`;
-        resultDiv.style.color = color;
-        resultDiv.style.background = "rgba(0,0,0,0.5)";
-        resultDiv.innerHTML = `<div style="font-size:1.2rem">${title}</div><div style="font-size:0.9rem; color:#fff">${desc}</div>`;
+            if (urlVal !== "") {
+                const isBad = urlVal.includes("login") || urlVal.includes("bank") || !urlVal.startsWith("https");
+                if (isBad) {
+                    updateRes("🔴 ҚАУІПТІ СІЛТЕМЕ", "Фишингтік белгілер табылды!", "#ff4d4d");
+                } else {
+                    updateRes("🟢 ҚАУІПСІЗ СІЛТЕМЕ", "ИИ күдікті ештеңе таппады.", "#00ff00");
+                }
+            } else if (passVal !== "") {
+                const strength = (passVal.length > 8) + /[A-Z]/.test(passVal) + /[0-9]/.test(passVal);
+                if (strength >= 3) updateRes("🔒 КҮШТІ ПАРОЛЬ", "Қорғаныс деңгейі жоғары.", "#00ff00");
+                else updateRes("⚠️ ӘЛСІЗ ПАРОЛЬ", "Парольді күшейтуді ұсынамыз.", "#ffcc00");
+            } else {
+                updateRes("ℹ️ МӘЛІМЕТ ЖОҚ", "Тексеру үшін мәтін енгізіңіз.", "#888");
+            }
+        });
     }
 
-    // ГЕНЕРАЦИЯНЫ ТОҚТАТУ НЕМЕСЕ РЕТТЕУ
-    const genBtn = document.querySelector('.btn-gen'); // Генерация батырмасының класы осы ма, тексеріңіз
+    // 4. Генерация батырмасы (дизайн ішінде көрсету)
     if (genBtn) {
         genBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+            const chars = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%";
             let pass = "";
-            for (let i = 0; i < 14; i++) pass += chars.charAt(Math.floor(Math.random() * chars.length));
+            for (let i = 0; i < 12; i++) pass += chars.charAt(Math.floor(Math.random() * chars.length));
             
-            // Генерация нәтижесін инпуттың өзіне жазамыз (ыңғайлы болу үшін)
-            if (passInput) passInput.value = pass;
-            alert("Жаңа пароль генерацияланды және инпутқа жазылды!");
+            if (passInput) {
+                passInput.value = pass;
+                // Генерацияланғанын көрсету үшін инпутты жылтырату
+                passInput.style.border = "2px solid #00ff00";
+                setTimeout(() => passInput.style.border = "", 1000);
+            }
         });
+    }
+
+    function updateRes(title, text, color) {
+        resultDiv.style.border = `1px solid ${color}`;
+        resultDiv.style.color = color;
+        resultDiv.style.background = "rgba(0,0,0,0.3)";
+        resultDiv.innerHTML = `<strong>${title}</strong><br>${text}`;
     }
 });
 </script>
